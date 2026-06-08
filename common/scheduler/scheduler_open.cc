@@ -15,6 +15,7 @@
 
 #include "policies/dvfsMaxFreq.h"
 #include "policies/dvfsFixedPower.h"
+#include "policies/dvfsMappingPower.h"
 #include "policies/dvfsTSP.h"
 #include "policies/dvfsTestStaticPower.h"
 #include "policies/mapFirstUnused.h"
@@ -346,6 +347,11 @@ void SchedulerOpen::initDVFSPolicy(String policyName) {
 		String thermalModelFilename = Sim()->getCfg()->getString("periodic_thermal/thermal_model");
 		thermalModel = new ThermalModel((unsigned int)coreRows, (unsigned int)coreColumns, thermalModelFilename, ambientTemperature, maxTemperature, inactivePower, tdp);
 		dvfsPolicy = new DVFSTSP(thermalModel, performanceCounters, coreRows, coreColumns, minFrequency, maxFrequency, frequencyStepSize);
+	} else if (policyName == "mappingPower") {
+		String powerMappingsPath = Sim()->getCfg()->getString("scheduler/open/dvfs/mapping_power/power_mappings_file");
+		String powerLookupPath = Sim()->getCfg()->getString("scheduler/open/dvfs/mapping_power/power_lookup_file");
+		dvfsPolicy = new DVFSMappingPower(performanceCounters, coreRows, coreColumns, minFrequency, maxFrequency,
+		                                  powerMappingsPath.c_str(), powerLookupPath.c_str());
 	} else {
 		cout << "\n[Scheduler] [Error]: Unknown DVFS Algorithm" << endl;
  		exit (1);

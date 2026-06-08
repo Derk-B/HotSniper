@@ -57,11 +57,11 @@ def prev_run_cleanup():
             os.remove(os.path.join(BENCHMARKS, f))
         
 
-def save_output(base_configuration, benchmark, console_output, cpistack, started, ended):
+def save_output(base_configuration, benchmark, console_output, cpistack, started, ended, custom_output_tag):
     benchmark_text = benchmark
     if len(benchmark_text) > 100:
         benchmark_text = benchmark_text[:100] + '__etc'
-    run = 'results_{}_{}_{}'.format(BATCH_START, '+'.join(base_configuration), benchmark_text)
+    run = 'results_{}_{}_{}_{}'.format(BATCH_START, '+'.join(base_configuration), benchmark_text, '_'+custom_output_tag)
     directory = os.path.join(RESULTS_FOLDER, run)
     if not os.path.exists(directory):
         os.makedirs(directory)
@@ -109,7 +109,7 @@ def save_output(base_configuration, benchmark, console_output, cpistack, started
     create_plots(run)
 
 
-def run(base_configuration, benchmark, ignore_error=False, perforation_script: str = None):
+def run(base_configuration, benchmark, ignore_error=False, custom_output_tag: str = None, perforation_script: str = None):
     print('running {} with configuration {}'.format(benchmark, '+'.join(base_configuration)))
     started = datetime.datetime.now()
     change_base_configuration(base_configuration)
@@ -165,7 +165,7 @@ def run(base_configuration, benchmark, ignore_error=False, perforation_script: s
 
     ended = datetime.datetime.now()
 
-    save_output(base_configuration, benchmark, console_output, cpistack, started, ended)
+    save_output(base_configuration, benchmark, console_output, cpistack, started, ended, custom_output_tag)
 
     if p.returncode != 0:
         raise Exception('return code != 0')
@@ -263,15 +263,15 @@ def get_workload(benchmark, cores, parallelism=None, number_tasks=None, input_se
 def example():
     for benchmark in (
                       'parsec-blackscholes',
-                      #'parsec-bodytrack',
+                    #   'parsec-bodytrack',
                       #'parsec-canneal',
                       #'parsec-dedup',
-                      #'parsec-ferret'
+                    #   'parsec-ferret',
                       #'parsec-fluidanimate',
-                      #'parsec-streamcluster',
-                      #'parsec-swaptions',
+                    #   'parsec-streamcluster',
+                    #   'parsec-swap?tions',
                       #'parsec-x264',
-                      #'splash2-barnes',
+                    #   'splash2-barnes',
                       #'splash2-fmm',
                       #'splash2-ocean.cont',
                       #'splash2-ocean.ncont',
@@ -288,11 +288,16 @@ def example():
 
         min_parallelism = get_feasible_parallelisms(benchmark)[0]
         max_parallelism = get_feasible_parallelisms(benchmark)[-1]
-        for freq in (1, 2):
+        # for freq in range(5):
+        #     #for parallelism in (max_parallelism,):
+        #     for parallelism in (4,):
+        #         # you can also use try_run instead
+        #         run(['{:.1f}GHz'.format(2.5 + freq / 10), 'maxFreq', 'slowDVFS'], get_instance(benchmark, parallelism, input_set='simsmall'))
+        for freq in (4,):
             #for parallelism in (max_parallelism,):
-            for parallelism in (3, ):
+            for parallelism in (4,):
                 # you can also use try_run instead
-                run(['{:.1f}GHz'.format(freq), 'maxFreq', 'slowDVFS'], get_instance(benchmark, parallelism, input_set='simsmall'))
+                run(['{:.1f}GHz'.format(freq), 'mappingPower', 'slowDVFS'], get_instance(benchmark, parallelism, input_set='simsmall'), custom_output_tag="tsp")
 
 def example_pcgov():
     for benchmark in (
